@@ -15,7 +15,12 @@ public class DatabaseHelper {
 	{
 		Connection con = null;
 		
-		String dbUrl = "jdbc:ucanaccess://C:/Users/jerry/Downloads/weigh.mdb";
+		//test string for laptop
+		//String dbUrl = "jdbc:ucanaccess://C:/Users/jerry/Downloads/weigh.mdb";
+		
+		//string to connect to database from scale server
+		String dbUrl = "jdbc:ucanaccess://C:/Program Files (x86)/WeighMaster/Data/weigh.mdb" ;
+				
 		
 		try
 		{

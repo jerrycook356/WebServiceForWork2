@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -178,6 +179,7 @@ public class WebService {
 						
 			
 			ResultSet rs = ps.executeQuery();
+			ps.close();
 			while(rs.next()) {
 				Transaction transaction = new Transaction();
 				transaction.setTruckId(rs.getString(2));
@@ -191,6 +193,7 @@ public class WebService {
 				transaction.setEndDate("");
 				
 				selectedResults.add(transaction);
+				con.close();
 			}
 					
 		}catch(SQLException e) {
@@ -202,4 +205,49 @@ public class WebService {
 		return returnString;
 		
 	}
+	
+	@GET
+	@Path("getSummary")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getSummary(@QueryParam("startDate")String startDate, @QueryParam("endDate")String endDate,
+			@QueryParam("customer")String customer) 
+		
+	{
+		List<Transaction> transactions = new ArrayList<Transaction>();
+		String returnString;
+		try(Connection con = db.getConnection()){
+			String sql = "SELECT * FROM [MATERIAL TRANSACTION] WHERE [GROSS TIMESTAMP] BETWEEN ? AND ?"
+					+" AND [CUSTOMER] = ? ORDER BY SOURCE ";
+			//date time format 2018-11-27 00:00:00.000000
+			
+			PreparedStatement ps = con.prepareStatement(sql);
+			ps.setString(1, startDate);
+			ps.setString(2,endDate);			
+			ps.setString(3, customer);
+			ResultSet rs = ps.executeQuery();
+			ps.close();
+			while(rs.next()) {
+				Transaction transaction = new Transaction();
+				transaction.setSource(rs.getString(4));
+				transaction.setDestination(rs.getString(5));
+				transaction.setGrossWeight(rs.getString(13));
+				transaction.setTareWeight(rs.getString(17));
+				
+				transactions.add(transaction);
+			}
+						
+			
+		}catch(SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		Gson gson = new Gson();
+        returnString = gson.toJson(transactions);
+        
+        return returnString;
+	}
+	
+		
+	
+	
 }
